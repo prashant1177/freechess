@@ -1,0 +1,20 @@
+
+
+
+.error-msg {
+  color: red;
+  margin-bottom: 10px;
+}
+
+.white {
+  background-color: #f0d9b5;
+}
+
+.black {
+  background-color: #b58863;
+}
+
+.highlight {
+  outline: 2px solid 	#f6f669;
+  z-index: 1;
+}
