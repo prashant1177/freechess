@@ -53,7 +53,11 @@ public class FreechessController {
         gameData.setBoardState(board);
         gameData.setMoveNumber(gameData.getMoveNumber() + 1);
         HashMap<String, String> kingChecks = chessBoard.getLegalMoves(board, oppKing, piece.startsWith("W") ? "B" : "W");
-        if (!kingChecks.isEmpty()) { gameData.setCheck(true);
+        if (!kingChecks.isEmpty()) { 
+            gameData.setCheck(true);
+            if (chessBoard.isCheckmate(piece.startsWith("W") ? "B" : "W", oppKing)) {
+                System.out.println("Checkmate! " + (piece.startsWith("W") ? "White" : "Black") + " wins!");
+            } 
             return gameData;
         }
         gameData.setCheck(false);

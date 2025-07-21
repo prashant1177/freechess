@@ -1,4 +1,4 @@
-export default function Sidebar({lastMove, turn}) {
+export default function Sidebar({lastMove, turn, restart}) {
   return (
     <aside className="w-1/4 border-r border-slate-700 p-6 bg-slate-800 hidden lg:flex flex-col justify-between">
           <div>
@@ -22,7 +22,7 @@ export default function Sidebar({lastMove, turn}) {
               <button className="bg-slate-700 hover:bg-slate-600 text-slate-100 px-4 py-2 rounded-md font-semibold text-sm">
                 Offer Draw
               </button>
-              <button className="bg-slate-700 hover:bg-slate-600 text-slate-100 px-4 py-2 rounded-md font-semibold text-sm">
+              <button onClick={restart} className="bg-slate-700 hover:bg-slate-600 text-slate-100 px-4 py-2 rounded-md font-semibold text-sm">
                 Restart
               </button>
             </div>

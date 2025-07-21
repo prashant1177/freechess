@@ -10,18 +10,26 @@ public class GameData {
     private int moveNumber = 1;
     private boolean check = false;
     private Map<String, String> boardState; // Example: "e4" -> "wP"
+    private boolean checkmate;  // ✅ Add this
 
     
     public GameData() {
     }
 
-    public GameData(int moveNumber, boolean check, Map<String, String> boardState) {
+    public GameData(int moveNumber, boolean check, Map<String, String> boardState, boolean checkmate) {
         this.moveNumber = moveNumber;
         this.check = check;
         this.boardState = boardState;
+        this.checkmate = checkmate; // ✅ Initialize checkmate
     }
 
+public boolean isCheckmate() {
+        return checkmate;
+    }
 
+    public void setCheckmate(boolean checkmate) {
+        this.checkmate = checkmate;
+    }
     // Getters and Setters
 
     public int getMoveNumber() {

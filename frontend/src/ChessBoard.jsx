@@ -22,8 +22,9 @@ const pieceMap = {
 const ChessBoard = () => {
   const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
   const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
-const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
 
+  const [boardData, setBoardData] = useState([]);
+  const [turn, setTurn] = useState("W");
   const [selectedSquare, setSelectedSquare] = useState(null);
   const [legalMoves, setLegalMoves] = useState([]);
   const [selectedPiece, setSelectedPiece] = useState(null);
@@ -31,8 +32,8 @@ const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
   const [errorMessage, setErrorMessage] = useState("");
   const [whiteKing, setWhiteKing] = useState("e1");
   const [blackKing, setBlackKing] = useState("e8");
-  const [gameStart, setGameStart] = useState(false);
-  
+  const [check, setCheck] = useState(false);
+
   useEffect(() => {
     axios
       .get("http://localhost:8080/game")
@@ -46,8 +47,22 @@ const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
         }
       })
       .catch((err) => console.error("Error fetching board:", err));
-    setGameStart(true);
   }, []);
+
+  const restart = () => {
+    axios
+      .get("http://localhost:8080/restart")
+      .then((res) => {
+        setBoardData(res.data.boardState);
+        setTurn(res.data.moveNumber % 2 === 0 ? "B" : "W");
+        if (res.data.check) {
+          setCheck(res.data.moveNumber % 2 === 0 ? blackKing : whiteKing);
+        } else {
+          setCheck(null);
+        }
+      })
+      .catch((err) => console.error("Error fetching board:", err));
+  };
   const getLegalMoves = (squareId, piece) => {
     const file = squareId[0];
     const rank = parseInt(squareId[1]);
@@ -257,10 +272,12 @@ const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
       isWhite = !isWhite;
       for (let file of files) {
         const id = `${file}${rank}`;
-        const color = isWhite ? "white" : "black";
         const pieceKey = boardData[id] || "";
         const piece = pieceMap[pieceKey];
         const isMove = legalMoves.includes(id);
+        const color = isWhite
+          ? "bg-slate-200 text-black"
+          : "bg-slate-600 text-white";
         isWhite = !isWhite;
 
         squares.push(
@@ -268,10 +285,8 @@ const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
             key={id}
             id={id}
             className={`aspect-square flex justify-center items-center text-5xl font-medium ${
-              isWhite ? "bg-slate-200 text-black" : "bg-slate-600 text-white"
-            }        ${isMove ? "border-gray-900 border-2" : ""} ${
-              id === check ? "bg-red-500" : ``
-            }`}
+              id == check ? "bg-red-500" : `${color}`
+            }     ${isMove ? "border-gray-900 border-2" : ""} `}
             onClick={() => handleSquareClick(id)}
           >
             <span
@@ -291,7 +306,7 @@ const { setBoardData, setTurn, setCheck,boardData, turn, check } = useGame();
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar lastMove={lastMove} turn={turn}/>
+      <Sidebar lastMove={lastMove} turn={turn} restart={restart}/>
 
       <main className="flex-1 flex justify-center items-center bg-slate-900 p-4">
         <div className="aspect-square w-full max-w-[90vmin] bg-slate-800 rounded-xl p-2 grid grid-cols-8 grid-rows-8 gap-1">
