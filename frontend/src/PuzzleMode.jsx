@@ -18,7 +18,7 @@ const pieceMap = {
   "": "",
 };
 
-const ChessBoard = () => {
+const PuzzleMode = () => {
   const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
   const ranks = [8, 7, 6, 5, 4, 3, 2, 1];
 
@@ -305,7 +305,7 @@ const ChessBoard = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar lastMove={lastMove} turn={turn} restart={restart}/>
+      <Sidebar mode="Puzzle Mode" lastMove={lastMove} turn={turn} restart={restart}/>
 
       <main className="flex-1 flex justify-center items-center bg-slate-900 p-4">
         <div className="aspect-square w-full max-w-[90vmin] bg-slate-800 rounded-xl p-2 grid grid-cols-8 grid-rows-8 gap-1">
@@ -316,4 +316,4 @@ const ChessBoard = () => {
   );
 };
 
-export default ChessBoard;
+export default PuzzleMode;
