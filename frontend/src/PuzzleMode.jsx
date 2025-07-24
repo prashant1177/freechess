@@ -32,36 +32,22 @@ const PuzzleMode = () => {
   const [whiteKing, setWhiteKing] = useState("e1");
   const [blackKing, setBlackKing] = useState("e8");
   const [check, setCheck] = useState(false);
+  const [solution, setSolution] = useState([]);
+  const [rightMove, setRightMove] = useState(0);
+  const [correctPiece, setCorrectPiece] = useState(false);
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/game")
+      .get("http://localhost:8080/puzzles")
       .then((res) => {
+        console.log("Puzzle data:", res.data.boardState);
         setBoardData(res.data.boardState);
+        setSolution(res.data.solution);
         setTurn(res.data.moveNumber % 2 === 0 ? "B" : "W");
-        if (res.data.check) {
-          setCheck(res.data.moveNumber % 2 === 0 ? blackKing : whiteKing);
-        } else {
-          setCheck(null);
-        }
       })
       .catch((err) => console.error("Error fetching board:", err));
   }, []);
 
-  const restart = () => {
-    axios
-      .get("http://localhost:8080/restart")
-      .then((res) => {
-        setBoardData(res.data.boardState);
-        setTurn(res.data.moveNumber % 2 === 0 ? "B" : "W");
-        if (res.data.check) {
-          setCheck(res.data.moveNumber % 2 === 0 ? blackKing : whiteKing);
-        } else {
-          setCheck(null);
-        }
-      })
-      .catch((err) => console.error("Error fetching board:", err));
-  };
   const getLegalMoves = (squareId, piece) => {
     const file = squareId[0];
     const rank = parseInt(squareId[1]);
@@ -220,43 +206,42 @@ const PuzzleMode = () => {
     setErrorMessage("");
     const piece = boardData[squareId];
 
-    if (!selectedSquare || !legalMoves.includes(squareId)) {
+    if (!selectedSquare || !legalMoves.includes(squareId) ) {
       if (piece && piece !== "" && piece.startsWith(turn)) {
         setSelectedSquare(squareId);
         setSelectedPiece(piece);
         const moves = getLegalMoves(squareId, piece);
         setLegalMoves(moves);
+        console.log("Right moves: ", solution[rightMove][0], "Selected moves: ", squareId );
+        if(solution[rightMove][0] === squareId) {
+          setCorrectPiece(true);
+
+        }else {
+          setCorrectPiece(false);
+        }
       }
       return;
     }
 
-    if (legalMoves.includes(squareId)) {
-      axios
-        .post("http://localhost:8080/move", {
-          turn: turn,
-          from: selectedSquare,
-          to: squareId,
-          yourKing: turn === "W" ? whiteKing : blackKing,
-          oppKing: turn === "W" ? blackKing : whiteKing,
-        })
-        .then((res) => {
-          setBoardData(res.data.boardState);
-          setTurn(res.data.moveNumber % 2 === 0 ? "B" : "W");
-          console.log(turn, "Turn after move:", res.data.moveNumber);
-          setLastMove(`${selectedPiece} from ${selectedSquare} to ${squareId}`);
-          if (selectedPiece === "W-King") setWhiteKing(squareId);
-          if (selectedPiece === "B-King") setBlackKing(squareId);
-          if (res.data.check) {
-            setCheck(res.data.moveNumber % 2 === 0 ? blackKing : whiteKing);
-          } else {
-            setCheck(null);
-          }
-        })
-        .catch((err) => {
-          setErrorMessage("Server rejected the move.");
-          console.error("Move error:", err);
-        });
-
+        console.log("Right moves: ", solution[rightMove][1], "Selected moves: ", squareId );
+    if (legalMoves.includes(squareId) && correctPiece && solution[rightMove][1] === squareId) {
+      
+        console.log("Right moves: ", solution[rightMove][1], "Selected moves: ", squareId );
+      setBoardData((prev) => ({
+        ...prev,
+        [selectedSquare]: "",
+        [squareId]: selectedPiece,
+      }));
+      setTurn(turn === "B" ? "B" : "W");
+      setBoardData((prev) => ({
+        ...prev,
+        [solution[rightMove+1][0]]: "",
+        [solution[rightMove+1][1]]: boardData[solution[rightMove+1][0]],
+      }));
+      setRightMove(rightMove + 2);
+      if( rightMove + 2 >= solution.length) {
+        console.log("Congratulations! You have completed the puzzle.");
+      }
       setSelectedSquare(null);
       setSelectedPiece(null);
       setLegalMoves([]);
@@ -305,7 +290,7 @@ const PuzzleMode = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar mode="Puzzle Mode" lastMove={lastMove} turn={turn} restart={restart}/>
+      <Sidebar mode="Puzzle Mode" lastMove={lastMove} turn={turn} />
 
       <main className="flex-1 flex justify-center items-center bg-slate-900 p-4">
         <div className="aspect-square w-full max-w-[90vmin] bg-slate-800 rounded-xl p-2 grid grid-cols-8 grid-rows-8 gap-1">
