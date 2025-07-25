@@ -305,13 +305,13 @@ const ChessBoard = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar lastMove={lastMove} turn={turn} restart={restart}/>
-
       <main className="flex-1 flex justify-center items-center bg-slate-900 p-4">
         <div className="aspect-square w-full max-w-[90vmin] bg-slate-800 rounded-xl p-2 grid grid-cols-8 grid-rows-8 gap-1">
           {renderSquares()}
         </div>
       </main>
+      <Sidebar lastMove={lastMove} turn={turn} restart={restart}/>
+
     </div>
   );
 };

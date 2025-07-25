@@ -43,7 +43,17 @@ const PuzzleMode = () => {
         console.log("Puzzle data:", res.data.boardState);
         setBoardData(res.data.boardState);
         setSolution(res.data.solution);
-        setTurn(res.data.moveNumber % 2 === 0 ? "B" : "W");
+        setTurn(res.data.moveNumber % 2 === 0 ? "W" : "B");
+
+        setTimeout(() => {
+          setBoardData((prev) => ({
+            ...prev,
+            [res.data.solution[rightMove][0]]: "",
+            [res.data.solution[rightMove][1]]:
+              res.data.boardState[res.data.solution[rightMove][0]],
+          }));
+          setRightMove(1);
+        }, 250);
       })
       .catch((err) => console.error("Error fetching board:", err));
   }, []);
@@ -206,40 +216,58 @@ const PuzzleMode = () => {
     setErrorMessage("");
     const piece = boardData[squareId];
 
-    if (!selectedSquare || !legalMoves.includes(squareId) ) {
+    if (!selectedSquare || !legalMoves.includes(squareId)) {
       if (piece && piece !== "" && piece.startsWith(turn)) {
         setSelectedSquare(squareId);
         setSelectedPiece(piece);
         const moves = getLegalMoves(squareId, piece);
         setLegalMoves(moves);
-        console.log("Right moves: ", solution[rightMove][0], "Selected moves: ", squareId );
-        if(solution[rightMove][0] === squareId) {
+        console.log(
+          "Right moves: ",
+          solution[rightMove][0],
+          "Selected moves: ",
+          squareId
+        );
+        if (solution[rightMove][0] === squareId) {
           setCorrectPiece(true);
-
-        }else {
+        } else {
           setCorrectPiece(false);
         }
       }
       return;
     }
 
-        console.log("Right moves: ", solution[rightMove][1], "Selected moves: ", squareId );
-    if (legalMoves.includes(squareId) && correctPiece && solution[rightMove][1] === squareId) {
-      
-        console.log("Right moves: ", solution[rightMove][1], "Selected moves: ", squareId );
+    console.log(
+      "Right moves: ",
+      solution[rightMove][1],
+      "Selected moves: ",
+      squareId
+    );
+    if (
+      legalMoves.includes(squareId) &&
+      correctPiece &&
+      solution[rightMove][1] === squareId
+    ) {
+      console.log(
+        "Right moves: ",
+        solution[rightMove][1],
+        "Selected moves: ",
+        squareId
+      );
       setBoardData((prev) => ({
         ...prev,
         [selectedSquare]: "",
         [squareId]: selectedPiece,
       }));
       setTurn(turn === "B" ? "B" : "W");
-      setBoardData((prev) => ({
-        ...prev,
-        [solution[rightMove+1][0]]: "",
-        [solution[rightMove+1][1]]: boardData[solution[rightMove+1][0]],
-      }));
-      setRightMove(rightMove + 2);
-      if( rightMove + 2 >= solution.length) {
+      if (rightMove + 1 < solution.length) {
+        setBoardData((prev) => ({
+          ...prev,
+          [solution[rightMove + 1][0]]: "",
+          [solution[rightMove + 1][1]]: boardData[solution[rightMove + 1][0]],
+        }));
+        setRightMove(rightMove + 2);
+      } else {
         console.log("Congratulations! You have completed the puzzle.");
       }
       setSelectedSquare(null);
@@ -290,13 +318,13 @@ const PuzzleMode = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <Sidebar mode="Puzzle Mode" lastMove={lastMove} turn={turn} />
 
       <main className="flex-1 flex justify-center items-center bg-slate-900 p-4">
         <div className="aspect-square w-full max-w-[90vmin] bg-slate-800 rounded-xl p-2 grid grid-cols-8 grid-rows-8 gap-1">
           {renderSquares()}
         </div>
       </main>
+      <Sidebar mode="Puzzle Mode" lastMove={lastMove} turn={turn} />
     </div>
   );
 };
